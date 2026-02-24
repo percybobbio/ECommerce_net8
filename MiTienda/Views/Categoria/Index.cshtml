@@ -1,0 +1,76 @@
+﻿@model List<CategoriaVM>
+
+<div class="row justify-content-between mt-4">
+    <div class="col-4">
+        <h4>Categorias</h4>
+    </div>
+    <div class="col-4 text-end">
+        <a href="/Categoria/AddEdit" class="btn btn-success">Crear Nueva <i class="fa-solid fa-circle-plus"></i></a>
+    </div>
+
+</div>
+<hr />
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th style="width: 120px">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Descripcion</td>
+                <td>
+                    <span class="badge @item.EstadoColor">
+                        @item.EstadoTexto
+                    </span>
+                </td>
+                <td style="width: 200px">
+                    <a asp-controller="Categoria" asp-action="AddEdit" asp-route-id="@item.IdCategoria" class="btn btn-sm btn-primary"><i class="fa-solid fa-pen"></i> Editar</a>
+                    <button class="btn btn-sm btn-danger" onclick="deleteCategoria(@item.IdCategoria)"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+
+    <script>
+        function deleteCategoria(id){
+
+          Swal.fire({
+          title: "Esta seguro de eliminar?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Si, eliminar!",
+          cancelButtonText: "No, Regresar!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/Categoria/Delete/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Recargar la página o eliminar la fila de la tabla
+                        location.reload();
+                    } else {
+                        alert("Error al eliminar la categoría.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+          
+        });
+        }
+    </script>
+}
