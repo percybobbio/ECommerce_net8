@@ -1,0 +1,70 @@
+﻿@model List<MarcaVM>
+
+<div class="row justify-content-between mt-4">
+    <div class="col-4">
+        <h4>Marcas</h4>
+    </div>
+    <div class="col-4 text-end">
+        <a asp-controller="Marca" asp-action="AddEdit" class="btn btn-success">Crear Nueva <i class="fa-solid fa-circle-plus"></i></a>
+    </div>
+
+</div>
+<hr />
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Marca</th>
+            <th>Estado</th>
+            <th style="width: 120px">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Descripcion</td>
+                <td>
+                    <span class="badge @item.EstadoColor">
+                        @item.EstadoTexto
+                    </span>
+                </td>
+                <td style="width: 200px">
+                    <a asp-controller="Marca" asp-action="AddEdit" asp-route-id="@item.IdMarca" class="btn btn-sm btn-primary"><i class="fa-solid fa-pen"></i> Editar</a>
+                    <form asp-controller="Marca" asp-action="Delete" asp-route-id="@item.IdMarca" method="post" onsubmit="confirmarEliminacion(event)" style="display:inline-block">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i> Eliminar</button>
+
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+
+    <script>
+        function confirmarEliminacion(event){
+          // 1. ¡ALTO AHÍ! Detenemos el envío automático del formulario
+          event.preventDefault();
+
+          // 2. Capturamos exactamente cuál de todos los formularios de la tabla fue el que presionamos
+          const formulario = event.target;
+
+          Swal.fire({
+          title: "Esta seguro de eliminar?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Si, eliminar!",
+          cancelButtonText: "No, Regresar!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            formulario.submit();
+            }
+          
+        });
+        }
+    </script>
+}
+

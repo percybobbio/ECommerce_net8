@@ -18,7 +18,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped(typeof(GenericoRepository<>));
 builder.Services.AddScoped<CategoriaService>();
-
+builder.Services.AddScoped<MarcaService>();
+builder.Services.AddScoped<ProductoService>();
 
 var app = builder.Build();
 

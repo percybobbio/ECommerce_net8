@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MiTienda.Context;
+using System.Linq.Expressions;
 
 namespace MiTienda.Repositories
 {
@@ -8,6 +9,17 @@ namespace MiTienda.Repositories
         public async Task<IEnumerable<TEntidad>> GetAllAsync()
         {
             return await _dbContext.Set<TEntidad>().ToListAsync();
+        }
+
+        //Generico para obtener una entidad relacionada a otra, por ejemplo, obtener un producto con su categoría
+        public async Task<IEnumerable<TEntidad>> GetAllAsync(params Expression<Func<TEntidad, object>>[] includes)
+        {
+            IQueryable<TEntidad> query = _dbContext.Set<TEntidad>();
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+            return await query.ToListAsync();
         }
 
         public async Task AddAsync(TEntidad entidad)
