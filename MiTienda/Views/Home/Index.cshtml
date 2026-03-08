@@ -1,8 +1,139 @@
-﻿@{
+﻿@model CatalogoVM;
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row p-5 bg-light mt-4">
+    <div class="col-sm-12 col-md-3 col-lg-3">
+        <div class="d-grid">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#categoriaModal">
+                Categorias
+            </button>
+        </div>
+        <div class="d-grid mt-3">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#marcaModal">
+                Marcas
+            </button>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-9 col-sm-9">
+        <form asp-controller="Home" asp-action="Index" method="get">
+            <div class="input-group">
+                <input type="text" class="form-control" name="buscar" autocomplete="off" placeholder="¿Que es lo que estas buscando?"/>
+                <button class="btn btn-outline-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>            
+        </form>
+    </div>
+</div>
+
+@if(Model.Filtro != "" && Model.Filtro != null)
+{
+    <div class="row bg-light p-2 mt-2">
+        <div class="col-sm-12">
+            @Model.Filtro
+        </div>
+    </div>
+}
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4 py-4">
+    @foreach (var p in Model.Productos)
+    {
+        <div class="col">
+            <div class="card shadow-sm">
+                <img class="card-img-top" src="~/images/@p.NombreImagen" alt="Alternate Text" />
+                <div class="card-body p-4">
+                    <div class="text-center">
+                        <h5 class="fw-bolder">@p.Nombre</h5>
+                        @p.Precio.ToString("C2")
+                    </div>
+                </div>
+
+                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                    <div class="text-center">
+                        <a 
+                            class="btn btn-outline-dark mt-auto" 
+                            role="button"
+                            asp-controller="Home"
+                            asp-action="ProductDetail"
+                            asp-route-id="@p.IdProducto"
+                        >
+                            Ver Detalle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal Categoria -->
+<div class="modal fade" id="categoriaModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Categorias</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row row-cols-2 g-2">
+                    <div class="col d-grid">
+                        <a class="btn btn-outline-dark" asp-controller="Home" asp-action="Index">Todas las categorias</a>
+                    </div>
+                    @foreach( var categoria in Model.Categorias)
+                    {
+                        <div class="col d-grid">
+                            <a 
+                                class="btn btn-outline-dark" 
+                                asp-controller="Home"
+                                asp-action="Index"
+                                asp-route-idCategoria="@categoria.IdCategoria"
+                                asp-route-nombreFiltro="@categoria.Descripcion"
+                            >
+                                @categoria.Descripcion
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Marca -->
+<div class="modal fade" id="marcaModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Marcas</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row row-cols-2 g-2">
+                    <div class="col d-grid">
+                        <a class="btn btn-outline-dark" asp-controller="Home" asp-action="Index">Todas las Marcas</a>
+                    </div>
+                    @foreach (var marca in Model.Marcas)
+                    {
+                        <div class="col d-grid">
+                            <a class="btn btn-outline-dark"
+                               asp-controller="Home"
+                               asp-action="Index"
+                               asp-route-idMarca="@marca.IdMarca"
+                               asp-route-nombreFiltro="@marca.Descripcion">
+                                @marca.Descripcion
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>

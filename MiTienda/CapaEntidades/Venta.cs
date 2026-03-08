@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiTienda.CapaEntidades
 {
@@ -10,13 +11,9 @@ namespace MiTienda.CapaEntidades
         public Cliente oCliente { get; set; }
         public int TotalProducto { get; set; }
         public decimal MontoTotal { get; set; }
-        public string Contacto { get; set; }
-        public string IdDistrito { get; set; }
-        public Distrito? oDistrito { get; set; }
-        public string Telefono { get; set; }
-        public string Direccion { get; set; }
         public string? IdTransaccion { get; set; }
         public DateTime FechaVenta { get; set; }
         public ICollection<DetalleVenta> oDetalleVenta { get; set; }
+        public virtual Direccion oDireccion { get; set; }
     }
 }

@@ -12,17 +12,32 @@ namespace MiTienda.Repositories
         }
 
         //Generico para obtener una entidad relacionada a otra, por ejemplo, obtener un producto con su categoría
-        public async Task<IEnumerable<TEntidad>> GetAllAsync(params Expression<Func<TEntidad, object>>[] includes)
+        public async Task<IEnumerable<TEntidad>> GetAllAsync(
+            Expression<Func<TEntidad, bool>>[]? conditions = null,
+            Expression<Func<TEntidad, object>>[]? includes = null
+            )
         {
             IQueryable<TEntidad> query = _dbContext.Set<TEntidad>();
-            foreach (var include in includes)
+
+            if (conditions != null)
             {
-                query = query.Include(include);
+                foreach (var condition in conditions)
+                {
+                    query = query.Where(condition);
+                }
+            }
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
             }
             return await query.ToListAsync();
         }
 
-        public async Task AddAsync(TEntidad entidad)
+        public virtual async Task AddAsync(TEntidad entidad)
         {
             _dbContext.Set<TEntidad>().Add(entidad);
             await _dbContext.SaveChangesAsync();

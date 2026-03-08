@@ -17,9 +17,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(cadenaSql));
 
 builder.Services.AddScoped(typeof(GenericoRepository<>));
+builder.Services.AddScoped<OrdenRepository>();
 builder.Services.AddScoped<CategoriaService>();
 builder.Services.AddScoped<MarcaService>();
 builder.Services.AddScoped<ProductoService>();
+builder.Services.AddHttpContextAccessor(); // Necesario para acceder al contexto HTTP en el CarritoService
+builder.Services.AddScoped<CarritoService>();
+builder.Services.AddScoped<OrdenService>();
+builder.Services.AddScoped<DireccionService>();
+
+//Activar memoria temporal para almacenar el carrito de compras
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Duración de la sesión
+    options.Cookie.HttpOnly = true; // Evitar acceso al cookie desde JavaScript
+    options.Cookie.IsEssential = true; // Asegurar que el cookie se envíe incluso si el usuario no acepta cookies
+});
 
 var app = builder.Build();
 
@@ -29,6 +42,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 app.UseStaticFiles();
+
+app.UseSession(); // Habilitar el uso de sesiones
 
 app.UseRouting();
 

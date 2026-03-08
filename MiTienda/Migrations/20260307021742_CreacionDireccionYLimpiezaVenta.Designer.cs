@@ -4,6 +4,7 @@ using MiTienda.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MiTienda.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307021742_CreacionDireccionYLimpiezaVenta")]
+    partial class CreacionDireccionYLimpiezaVenta
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,8 +285,7 @@ namespace MiTienda.Migrations
 
                     b.HasIndex("IdProvincia");
 
-                    b.HasIndex("IdVenta")
-                        .IsUnique();
+                    b.HasIndex("IdVenta");
 
                     b.ToTable("direccion", (string)null);
                 });
@@ -686,8 +688,8 @@ namespace MiTienda.Migrations
                         .IsRequired();
 
                     b.HasOne("MiTienda.CapaEntidades.Venta", "oVenta")
-                        .WithOne("oDireccion")
-                        .HasForeignKey("MiTienda.CapaEntidades.Direccion", "IdVenta")
+                        .WithMany()
+                        .HasForeignKey("IdVenta")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -768,9 +770,6 @@ namespace MiTienda.Migrations
             modelBuilder.Entity("MiTienda.CapaEntidades.Venta", b =>
                 {
                     b.Navigation("oDetalleVenta");
-
-                    b.Navigation("oDireccion")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

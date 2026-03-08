@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using MiTienda.CapaEntidades;
 using MiTienda.Models;
 using MiTienda.Repositories;
+using System.Linq.Expressions;
 
 namespace MiTienda.Services
 {
@@ -15,9 +16,17 @@ namespace MiTienda.Services
     {
         public async Task<IEnumerable<ProductoVM>> GetAllAsync()
         {
+            // 1. Obtener todos los productos con sus categorías y marcas relacionadas con includes y conditionals nullables
+            var includes = new Expression<Func<Producto, object>>[]
+            {
+                p => p.oCategoria!, // Incluir la categoría
+                p => p.oMarca! // Incluir la marca
+            };
+
+            //2. Llamamos al repositorio pasando 'null' a las condiciones y el array de includes para traer las entidades relacionadas
             var productos = await _productoRepository.GetAllAsync(
-                    p => p.oCategoria!, // Incluir la categoría
-                    p => p.oMarca! // Incluir la marca
+                    conditions: null, // No aplicamos condiciones, queremos todos los productos
+                    includes: includes // Pasamos el array de includes para traer categorías y marcas
                 );
 
             var productoVMs = productos.Select(item => new ProductoVM
@@ -60,7 +69,7 @@ namespace MiTienda.Services
             var categoriasFiltradas = categoria.Where(c =>
                 c.Activo == true || (producto != null && c.IdCategoria == producto!.IdCategoria));
 
-            var marcasFiltradas = marca.Where(m => 
+            var marcasFiltradas = marca.Where(m =>
                 m.Activo == true || (producto != null && m.IdMarca == producto.IdMarca));
 
             var productoVM = new ProductoVM();
@@ -92,23 +101,23 @@ namespace MiTienda.Services
             }
             // Cargar las listas de categorías y marcas filtradas para el dropdown sea para agregar o editar un producto
             productoVM.listaCategorias = categoriasFiltradas.Select(c => new SelectListItem
-                {
-                    Value = c.IdCategoria.ToString(),
-                    Text = c.Descripcion
-                }).ToList();
+            {
+                Value = c.IdCategoria.ToString(),
+                Text = c.Descripcion
+            }).ToList();
 
             productoVM.listaMarcas = marcasFiltradas.Select(m => new SelectListItem
-                {
-                    Value = m.IdMarca.ToString(),
-                    Text = m.Descripcion
-                }).ToList();
-            
+            {
+                Value = m.IdMarca.ToString(),
+                Text = m.Descripcion
+            }).ToList();
+
             return productoVM;
         }
 
         public async Task AddAsync(ProductoVM viewModel)
         {
-            if(viewModel.ArchivoImagen != null)
+            if (viewModel.ArchivoImagen != null)
             {
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
                 string fileName = Path.GetFileNameWithoutExtension(viewModel.ArchivoImagen.FileName);
@@ -141,7 +150,7 @@ namespace MiTienda.Services
         public async Task EditAsync(ProductoVM viewModel)
         {
             var entidad = await _productoRepository.GetByIdAsync(viewModel.IdProducto);
-            if(viewModel.ArchivoImagen != null)
+            if (viewModel.ArchivoImagen != null)
             {
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
                 string fileName = Path.GetFileNameWithoutExtension(viewModel.ArchivoImagen.FileName);
@@ -155,7 +164,7 @@ namespace MiTienda.Services
                 viewModel.RutaImagen = "/images/" + viewModel.NombreImagen;
             }
 
-            if (!entidad.RutaImagen.IsNullOrEmpty())
+            if (viewModel.ArchivoImagen != null)
             {
                 entidad.RutaImagen = viewModel.RutaImagen;
                 entidad.NombreImagen = viewModel.NombreImagen;
@@ -176,6 +185,63 @@ namespace MiTienda.Services
         {
             var entidad = await _productoRepository.GetByIdAsync(id);
             await _productoRepository.DeleteAsync(entidad!);
+        }
+
+        // Método adicional para obtener el catálogo de productos con sus categorías y marcas
+        public async Task<IEnumerable<ProductoVM>> GetCatalogAsync(int IdCategoria = 0, int IdMarca = 0, string buscar = "")
+        {
+            var conditions = new List<Expression<Func<Producto, bool>>>
+            {
+                x => x.Stock > 0 && x.Activo // Solo productos con stock disponible y Activos
+            };
+
+            //Filtro para Categoria: Si se recibe un IdCategoria diferente de 0, se agrega una condición para filtrar por esa categoría
+            if (IdCategoria != 0)
+            {
+                conditions.Add(x => x.IdCategoria == IdCategoria);
+            }
+
+            //Filtro por Marca: Si se recibe un IdMarca diferente de 0, se agrega una condición para filtrar por esa marca
+            if (IdMarca != 0)
+            {
+                conditions.Add(x => x.IdMarca == IdMarca);
+            }
+
+            if (!string.IsNullOrEmpty(buscar))
+            {
+                conditions.Add(x => x.Nombre.Contains(buscar) || x.Descripcion.Contains(buscar));
+            }
+
+            var includes = new Expression<Func<Producto, object>>[]
+            {
+                p => p.oCategoria!, // Incluir la categoría
+                p => p.oMarca! // Incluir la marca
+            };
+
+            var productos = await _productoRepository.GetAllAsync(
+                    conditions: conditions.ToArray(), // Pasamos las condiciones para filtrar por categoría, marca y búsqueda
+                    includes: includes // Pasamos el array de includes para traer categorías y marcas
+                );
+
+            var productoVMs = productos.Select(item => new ProductoVM
+            {
+                IdProducto = item.IdProducto,
+                Nombre = item.Nombre,
+                Descripcion = item.Descripcion,
+                Precio = item.Precio,
+                Stock = item.Stock,
+                RutaImagen = item.RutaImagen,
+                NombreImagen = item.NombreImagen,
+                Activo = item.Activo,
+
+                //TODO : Revisar si se deben eliminar
+                //Propiedades adicionales para mostrar el estado en la vista
+                EstadoTexto = item.Activo ? "Activo" : "Inactivo",
+                EstadoColor = item.Activo ? "bg-success" : "bg-danger",
+                FechaRegistro = item.FechaRegistro
+            }).ToList();
+
+            return productoVMs;
         }
     }
 }

@@ -22,6 +22,7 @@ namespace MiTienda.Context
         public DbSet<Provincia> Provincias { get; set; }
         public DbSet<Distrito> Distritos { get; set; }
         public DbSet<Carrito> Carritos { get; set; }
+        public DbSet<Direccion> Direcciones { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -261,12 +262,12 @@ namespace MiTienda.Context
                 e.HasKey(v => v.IdVenta);
                 e.Property(v => v.IdVenta).HasColumnName("idVenta").ValueGeneratedOnAdd();
 
+                // Mapeamos el ID del cliente explícitamente a su columna
+                e.Property(v => v.IdCliente).HasColumnName("idCliente").IsRequired();
+
                 e.Property(v => v.TotalProducto).HasColumnName("totalProducto").IsRequired();
                 e.Property(v => v.MontoTotal).HasColumnName("montoTotal").HasColumnType("decimal(10,2)").IsRequired();
 
-                e.Property(v => v.Contacto).HasColumnName("contacto").HasMaxLength(100).IsRequired();
-                e.Property(v => v.Telefono).HasColumnName("telefono").HasMaxLength(20).IsRequired();
-                e.Property(v => v.Direccion).HasColumnName("direccion").HasMaxLength(500).IsRequired();
                 e.Property(v => v.IdTransaccion).HasColumnName("idTransaccion").HasMaxLength(100);
 
                 e.Property(v => v.FechaVenta).HasColumnName("fechaVenta")
@@ -275,16 +276,9 @@ namespace MiTienda.Context
 
                 // Relación con Cliente
                 e.HasOne(v => v.oCliente)
-                    .WithMany()
+                    .WithMany(c => c.oVentas)
                     .HasForeignKey(v => v.IdCliente)
                     .OnDelete(DeleteBehavior.Restrict);
-
-                // Relación con Distrito (Ubigeo)
-                e.Property(v => v.IdDistrito).HasColumnName("idDistrito").HasMaxLength(6).IsFixedLength();
-                // Si tienes el objeto oDistrito en tu clase Venta:
-                e.HasOne(v => v.oDistrito)
-                    .WithMany()
-                    .HasForeignKey(v => v.IdDistrito);
             });
 
             modelBuilder.Entity<DetalleVenta>(e =>
@@ -295,6 +289,10 @@ namespace MiTienda.Context
 
                 e.Property(dv => dv.Cantidad).HasColumnName("cantidad").IsRequired();
                 e.Property(dv => dv.Total).HasColumnName("total").HasColumnType("decimal(10,2)").IsRequired();
+
+                // Mapeamos los IDs explícitamente a sus columnas en minúscula
+                e.Property(dv => dv.IdVenta).HasColumnName("idVenta").IsRequired();
+                e.Property(dv => dv.IdProducto).HasColumnName("idProducto").IsRequired();
 
                 // Relación con la Venta Padre
                 e.HasOne(dv => dv.oVenta)
@@ -310,6 +308,42 @@ namespace MiTienda.Context
 
                 e.ToTable(t => t.HasCheckConstraint("CK_DetalleVenta_Cantidad", "cantidad > 0"));
                 e.ToTable(t => t.HasCheckConstraint("CK_DetalleVenta_Total", "total >= 0"));
+            });
+
+            //Nueva tabla Direcciones, para almacenar las direcciones de envío de cada venta
+            modelBuilder.Entity<Direccion>(e =>
+            {
+                e.ToTable("direccion");
+                e.HasKey(d => d.IdDireccion);
+                e.Property(d => d.IdDireccion).HasColumnName("idDireccion").ValueGeneratedOnAdd();
+                //Propiedades
+                e.Property(d => d.IdVenta).HasColumnName("idVenta").IsRequired();
+                e.Property(d => d.Contacto).HasColumnName("contacto").HasMaxLength(100);
+                e.Property(d => d.Telefono).HasColumnName("telefono").HasMaxLength(20);
+                e.Property(d => d.DireccionCompleta).HasColumnName("direccionCompleta").IsRequired().HasMaxLength(200);
+                e.Property(d => d.IdDepartamento).HasColumnName("idDepartamento").HasMaxLength(2).IsFixedLength().IsRequired();
+                e.Property(d => d.IdProvincia).HasColumnName("idProvincia").HasMaxLength(4).IsFixedLength().IsRequired();
+                e.Property(d => d.IdDistrito).HasColumnName("idDistrito").HasMaxLength(6).IsFixedLength().IsRequired();
+                // Relaciones (Foreign Keys)
+                e.HasOne(d => d.oVenta)
+                    .WithOne(v => v.oDireccion) // <--- CAMBIAMOS A WithOne() Y LO ENLAZAMOS CON VENTA
+                    .HasForeignKey<Direccion>(d => d.IdVenta) //La llave esta en direccion, porque es la tabla dependiente, y se enlaza con el IdVenta de la venta
+                    .OnDelete(DeleteBehavior.Cascade); // Si se borra la venta, se borra su dirección
+
+                e.HasOne(d => d.oDepartamento)
+                    .WithMany()
+                    .HasForeignKey(d => d.IdDepartamento)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(d => d.oProvincia)
+                    .WithMany()
+                    .HasForeignKey(d => d.IdProvincia)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(d => d.oDistrito)
+                    .WithMany()
+                    .HasForeignKey(d => d.IdDistrito)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

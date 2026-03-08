@@ -1,0 +1,285 @@
+﻿@model List<CarritoItemVM>
+
+@{
+    ViewData["Title"] = "Carrito de Compras";
+    //Calcular el total de articulos y el precio total a pagar
+    int totalItems = Model.Sum(x => x.Cantidad);
+    decimal totalPagar = Model.Sum(x => x.Precio * x.Cantidad);
+}
+
+@if(Model.Count() == 0)
+{
+    <div class="alert alert-info text-center">
+        <h4 class="alert-heading">Tu carrito está vacío</h4>
+        <p>Agrega productos a tu carrito para verlos aquí.</p>
+        <hr />
+        <a href="/" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Volver a la tienda</a>
+    </div>
+}
+else
+{
+    <div class="row justify-content-between align-items-center mt-4 mb-3">
+        <div class="col-auto">
+            <h4 class="mb-0">Items del carrito</h4>
+        </div>
+
+        <div class="col-auto d-flex gap-2">
+            <a asp-controller="Home" asp-action="EmptyCart" class="btn btn-outline-danger">
+                Vaciar Carrito <i class="fa-solid fa-trash"></i>
+            </a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Ordenar <i class="fa-solid fa-credit-card"></i>
+            </button>
+        </div>
+    </div>
+    <hr />
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th style="width: 120px"></th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th style="width: 120px"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="align-middle">
+                    <td>
+                        @* Agregar la imagen *@
+                        <img src="~/images/@item.NombreImagen" alt="@item.Nombre" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;" loading="lazy">
+                    </td>
+                    <td>@item.Nombre</td>
+                    <td>@item.Precio.ToString("C2")</td>
+                    <td>@item.Cantidad</td>
+                    <td>@((item.Precio* item.Cantidad).ToString("C2"))</td>
+                    <td style="width: 200px">
+                        <a asp-controller="Categoria" asp-action="AddEdit" asp-route-id="@item.IdProducto" class="btn btn-sm btn-primary"><i class="fa-solid fa-pen"></i></a>
+                        <a href="/Home/RemoveItemToCart?productoId=@item.IdProducto" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i> </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot class="table-light fw-bold align-middle">
+            <tr>
+                <td colspan="3" class="text-end fs-5">Total General:</td>
+                <td class="fs-5">@totalItems</td>
+                <td class="fs-5 text-success">@totalPagar.ToString("C2")</td>
+
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/Home/PayNow" method="post">
+                
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Metodo de Pago</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <h4 class="modal-subtitle">Cliente</h4>
+                        <div class="col-12">
+                            <input type="email" class="form-control" placeholder="Correo Electrónico" />
+                        </div>
+                        <hr/>
+                        <h4 class="fs-5">Dirección de Entrega</h4>
+                        <div class="col-12">
+                            <input type="text" name="DireccionCompleta" class="form-control" placeholder="Direccíon" />
+                        </div>
+                        <div class="row w-100 m-0 g-2">
+                            <div class="col-4">
+                                <label for="cboDepartamento" class="form-label mb-1">Departamento</label>
+                                <select id="cboDepartamento" name="IdDepartamento" class="form-select"></select>
+                            </div>
+                            <div class="col-4">
+                                <label for="cboProvincia" class="form-label mb-1">Provincia</label>
+                                <select id="cboProvincia" name="IdProvincia" class="form-select"></select>
+                            </div>
+                            <div class="col-4">
+                                <label for="cboDistrito" class="form-label mb-1">Distrito</label>
+                                <select id="cboDistrito" name="IdDistrito" class="form-select"></select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <input type="text" name="Contacto" class="form-control" placeholder="Contacto" />
+                        </div>
+                        <div class="col-6">
+                            <input type="tel" name="Telefono" class="form-control" placeholder="Celular" />
+                        </div>
+                        <hr />
+                        <h4 class="fs-5">Datos de Pago</h4>
+                        <div class="col-12">
+                            <input type="text" class="form-control" placeholder="Titular de la Tarjeta" />
+                        </div>
+                        <div class="col-12">
+                            <label for="txtNumTarjeta" class="form-label">Número de Tarjeta</label>
+                            <div class="position-relative align-items-center">
+                               <input type="text" id="txtNumTarjeta" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" required autocomplete="off" />
+                               <i id="iconoMarca" class="fa-regular fa-credit-card position-absolute" style="top:10px; right:10px; font-size:1.5rem; color:#ccc; "></i>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <label for="txtMes" class="form-label">Mes Exp</label>
+                            <input id="txtMes" type="text" class="form-control" placeholder="MM" maxlength="2" required autocomplete="off" />
+                        </div>
+                        <div class="col-3">
+                            <label for="txtAnio" class="form-label">Año Exp</label>
+                            <input id="txtAnio" type="text" class="form-control" placeholder="YY" maxlength="2" required autocomplete="off" />
+                        </div>
+                        <div class="col-6">
+                            <label for="txtCVV" class="form-label">CVV</label>
+                            <input id="txtCVV" type="text" class="form-control" placeholder="123" maxlength="3" required autocomplete="off"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Pagar Ahora</button>
+                </div>
+
+            </form>
+         </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const txtNumTarjeta = document.getElementById("txtNumTarjeta");
+            const txtMes = document.getElementById("txtMes");
+            const txtAnio = document.getElementById("txtAnio");
+            const txtCVV = document.getElementById("txtCVV");
+
+            txtNumTarjeta.addEventListener("input", function (e) {
+                let valor = e.target.value.replace(/\D/g, "");
+
+                if (valor.length > 16) valor = valor.slice(0, 16);
+                let valorFormateado = valor.replace(/(\d{4})(?=\d)/g, "$1 ");
+                e.target.value = valorFormateado;
+
+                // 1. Encontrar el contenedor de la tarjeta
+                const contenedor = document.querySelector(".position-relative");
+
+                // 2. Definir las clases según la marca
+                let clasesIcono = "fa-regular fa-credit-card position-absolute";
+                let colorIcono = "#ccc";
+
+                if (valor.startsWith("4")) {
+                    clasesIcono = "fa-brands fa-cc-visa position-absolute";
+                    colorIcono = "#1a1f71";
+                } else if (/^(5[1-5]|2(2[2-9]|[3-6][0-9]|7[01]))/.test(valor)) {
+                    clasesIcono = "fa-brands fa-cc-mastercard position-absolute";
+                    colorIcono = "#eb001b";
+                } else if (valor.startsWith("3")) {
+                    clasesIcono = "fa-brands fa-cc-amex position-absolute";
+                    colorIcono = "#2e77bb";
+                }
+
+                // 3. Eliminar el SVG anterior (generado por Font Awesome) o la etiqueta 'i' original
+                const iconoViejo = contenedor.querySelector("svg, i");
+                if (iconoViejo) {
+                    iconoViejo.remove();
+                }
+
+                // 4. Crear un NUEVO elemento 'i' y agregarlo al DOM
+                const nuevoIcono = document.createElement("i");
+                nuevoIcono.id = "iconoMarca";
+                nuevoIcono.className = clasesIcono;
+                nuevoIcono.style.top = "10px";
+                nuevoIcono.style.right = "10px";
+                nuevoIcono.style.fontSize = "1.5rem";
+                nuevoIcono.style.color = colorIcono;
+
+                contenedor.appendChild(nuevoIcono);
+
+                // IMPORTANTE: Si estás usando SVG con JS, le decimos a Font Awesome que renderice el nuevo icono
+                if (window.FontAwesome) {
+                    window.FontAwesome.dom.i2svg({ node: nuevoIcono });
+                }
+            });
+
+            const soloNumeros = function (e) {
+                e.target.value = e.target.value.replace(/\D/g, "");
+            };
+
+            txtMes.addEventListener("input", soloNumeros);
+            txtAnio.addEventListener("input", soloNumeros);
+            txtCVV.addEventListener("input", soloNumeros);
+        });
+
+
+        //Carga de selects de Ubigeo
+        $(document).ready(function () {
+            //1. Cargar departamentos al iniciar la página
+            ListarDepartamentos();
+
+            //2. Cuando cambie el departamento, cargar las provincias
+            $("#cboDepartamento").on("change", function (){
+                ListarProvincias();
+            });
+
+            //3. Cuando cambie la provincia, cargar los distritos
+            $("#cboProvincia").on("change", function (){
+                ListarDistritos();
+            });
+        });
+
+        //Usamos el controlador TiendaController y recordar que estamos usando un UbigeoVM unico para propiedad id y descripcion, por eso el foreach en la respuesta de cada endpoint es igual
+        function ListarDepartamentos(){
+            $("<option>").attr({"value": "00", "disabled": "disabled", "selected": "true"}).text("Seleccionar").appendTo("#cboDepartamento");
+            fetch('@Url.Action("ObtenerDepartamentos", "Tienda")')
+                .then(response => response.json())
+                .then(json => {
+                    if(json.data != null){
+                        json.data.forEach(item => {
+                            $("<option>").val(item.id).text(item.descripcion).appendTo("#cboDepartamento");
+                        });
+                    }
+                });
+        }
+
+        function ListarProvincias(){
+            $("#cboProvincia").empty();
+            $("#cboDistrito").empty();
+            $("<option>").attr({"value": "00", "disabled": "disabled", "selected": "true"}).text("Seleccionar").appendTo("#cboProvincia");
+                const idDep = $("#cboDepartamento").val();
+                fetch(`@Url.Action("ObtenerProvincias", "Tienda")?idDepartamento=${idDep}`)
+                    .then(response => response.json())
+                    .then(json => {
+                        if(json.data != null){
+                            json.data.forEach(item => {
+                                $("<option>").val(item.id).text(item.descripcion).appendTo("#cboProvincia");
+                            });
+                        }
+                    });
+        }
+
+        function ListarDistritos(){
+            $("#cboDistrito").empty();
+            $("<option>").attr({"value": "00", "disabled": "disabled", "selected": "true"}).text("Seleccionar").appendTo("#cboDistrito");
+
+            const idDep = $("#cboDepartamento").val();
+            const idProv = $("#cboProvincia").val();
+
+                fetch(`@Url.Action("ObtenerDistritos", "Tienda")?idDepartamento=${idDep}&idProvincia=${idProv}`)
+                    .then(response => response.json())
+                    .then(json => {
+                        if(json.data != null){
+                            json.data.forEach(item => {
+                                $("<option>").val(item.id).text(item.descripcion).appendTo("#cboDistrito");
+                            });
+                        }
+                    });
+        }
+    </script>
+}

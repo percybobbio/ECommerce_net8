@@ -48,15 +48,12 @@
                 <span asp-validation-for="Stock" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="NombreImagen" class="form-label">Nombre Imagen</label>
-                <input type="text" asp-for="NombreImagen" class="form-control" autocomplete="off" />
-                <span asp-validation-for="NombreImagen" class="text-danger"></span>
-            </div>
+            <input type="hidden" asp-for="NombreImagen" />
+            <input type="hidden" asp-for="RutaImagen" />
 
             <div class="mb-3">
                 <label asp-for="ArchivoImagen" class="form-label">Subir Imagen</label>
-                <input type="file" asp-for="ArchivoImagen" class="form-control"/>
+                <input type="file" asp-for="ArchivoImagen" class="form-control" accept="image/*"/>
             </div>
 
             <div class="mb-3">
