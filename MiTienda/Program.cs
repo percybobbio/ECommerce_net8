@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using MiTienda.Context;
 using MiTienda.Repositories;
@@ -25,6 +26,7 @@ builder.Services.AddHttpContextAccessor(); // Necesario para acceder al contexto
 builder.Services.AddScoped<CarritoService>();
 builder.Services.AddScoped<OrdenService>();
 builder.Services.AddScoped<DireccionService>();
+builder.Services.AddScoped<ClienteService>();
 
 //Activar memoria temporal para almacenar el carrito de compras
 builder.Services.AddSession(options =>
@@ -33,6 +35,16 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true; // Evitar acceso al cookie desde JavaScript
     options.Cookie.IsEssential = true; // Asegurar que el cookie se envíe incluso si el usuario no acepta cookies
 });
+
+// Configurar la autenticación basada en cookies
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Cuenta/Login"; // Ruta a la página de inicio de sesión
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Duración de la cookie de autenticación
+        options.LogoutPath = "/Cuenta/Logout"; // Ruta a la página de cierre de sesión
+        options.AccessDeniedPath = "/Home/Error"; // Ruta a la página de acceso denegado
+    });
 
 var app = builder.Build();
 
@@ -46,6 +58,8 @@ app.UseStaticFiles();
 app.UseSession(); // Habilitar el uso de sesiones
 
 app.UseRouting();
+
+app.UseAuthentication(); // Habilitar la autenticación
 
 app.UseAuthorization();
 

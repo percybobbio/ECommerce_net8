@@ -1,0 +1,54 @@
+﻿@model LoginVM;
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MiTienda</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MiTienda.styles.css" asp-append-version="true" />
+    <link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+</head>
+<body class="bg-body-secondary">
+    <div class="container">
+        <div class="row justify-content-center align-items-center vh-100">
+            <div class="col-md-6 col-lg-4">
+                <div class="card-show">
+                    <div class="card-body p-4">
+                        <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+                        <form asp-controller="Cuenta" asp-action="Login" method="post">
+                            <div class="mb-3">
+                                <label for="Email" class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="Email" asp-for="Correo" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="Password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="Password" asp-for="Clave" required />
+                            </div>
+                                @if(ViewBag.mensaje != null)
+                                {
+                                    <div class="alert alert-danger mt-3" role="alert">
+                                        @ViewBag.mensaje
+                                    </div>
+                                }
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Ingresar</button>
+                                <a asp-controller="Cuenta" asp-action="Register" class="btn btn-outline-secondary">Registrar</a>
+                            </div>
+
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

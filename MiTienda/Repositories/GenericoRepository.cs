@@ -59,5 +59,23 @@ namespace MiTienda.Repositories
             _dbContext.Set<TEntidad>().Remove(entidad);
             await _dbContext.SaveChangesAsync();
         }
+
+        //Filtro para saber si el usuario existe o no, por ejemplo, para el login
+        public async Task<TEntidad?> GetByFilter(
+            Expression<Func<TEntidad, bool>>[] conditions
+            )
+        {
+            IQueryable<TEntidad> query = _dbContext.Set<TEntidad>();
+
+            if (conditions != null)
+            {
+                foreach (var condition in conditions)
+                {
+                    query = query.Where(condition);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync();
+        }
     }
 }

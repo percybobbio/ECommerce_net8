@@ -60,8 +60,6 @@ namespace MiTienda.Repositories
 
                 // Lanzamos la excepción con el mensaje real
                 throw new Exception($"Error en la Base de Datos: {errorReal}");
-
-            throw new Exception($"Error al agregar la venta: {ex.Message}");
             }
         }
 
@@ -69,8 +67,13 @@ namespace MiTienda.Repositories
         {
             var ventas = await _dbContext.Ventas
                 .Where(v => v.IdCliente == idCliente)
+                .OrderByDescending(v => v.FechaVenta)
                 .Include(v => v.oDetalleVenta)
-                .ThenInclude(dv => dv.oProducto)
+                    .ThenInclude(dv => dv.oProducto)
+                .Include(v => v.oDireccion)
+                    .ThenInclude(d => d.oDistrito) //carga distrito
+                        .ThenInclude(dis => dis.oProvincia) //Desde Distrito Carga Provincia
+                        .ThenInclude(pro => pro.oDepartamento) //Desde Provincia Carga Departamento
                 .ToListAsync();
 
             return ventas;

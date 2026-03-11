@@ -1,10 +1,12 @@
 ﻿using Ganss.Xss;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiTienda.Models;
 using MiTienda.Services;
 
 namespace MiTienda.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProductoController(ProductoService _productoService) : Controller
     {
         public async Task<IActionResult> IndexAsync()

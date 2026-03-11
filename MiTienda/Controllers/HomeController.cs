@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MiTienda.Models;
@@ -188,15 +189,28 @@ namespace MiTienda.Controllers
         [HttpPost]
         public async Task<IActionResult> PayNow(DireccionVM direccionEnvio)
         {
-            var carrito = _carritoService.ObtenerCarrito();
+            try
+            {
+                var carrito = _carritoService.ObtenerCarrito();
 
-            //El TODO sirve para ver en TaskList en la consola se accede por el menu view
-            //TODO: cambiar el idCliente por el id real
-            int idCliente = 1;
-            await _ordenService.AddAsync(carrito, idCliente, direccionEnvio);
-            _carritoService.VaciarCarrito();
+                //El TODO sirve para ver en TaskList en la consola se accede por el menu view
+                int idCliente = 0;
+                var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var parsedId))
+                {
+                    idCliente = parsedId;
+                }
+                await _ordenService.AddAsync(carrito, idCliente, direccionEnvio);
+                _carritoService.VaciarCarrito();
 
-            return View("SalesCompleted");
+                return View("SalesCompleted");
+
+            }
+            catch(Exception ex)
+            {
+                ViewBag.ErrorMessage = "Ocurrió un error al procesar el pago. Por favor, inténtelo de nuevo.";
+                return View("ViewCart", _carritoService.ObtenerCarrito());
+            }
         }
 
         public IActionResult SalesCompleted() { 
@@ -210,6 +224,11 @@ namespace MiTienda.Controllers
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult AccessDenied()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }

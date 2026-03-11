@@ -1,0 +1,96 @@
+﻿@model List<VentaVM>
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex align-items-center mb-4">
+        <i class="fa-solid fa-bag-shopping fa-2x text-primary me-3"></i>
+        <h2 class="fw-bold mb-0">Mis Pedidos</h2>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-light border text-center p-5 shadow-sm">
+            <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
+            <p class="lead">Aún no has realizado ninguna compra.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary px-4">Ir a la tienda</a>
+        </div>
+    }
+    else
+    {
+        <div class="accordion shadow-sm" id="accordionOrders">
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var venta = Model[i];
+                var collapseId = "collapse" + i;
+                var headerId = "heading" + i;
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="@headerId">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                            <div class="d-flex justify-content-between w-100 me-3 align-items-center">
+                                <div>
+                                    <span class="badge bg-primary me-2">Pedido #@(Model.Count - i)</span>
+                                    <span class="text-dark fw-bold">@venta.FechaVenta</span>
+                                </div>
+                                <span class="fw-bold text-success">@venta.MontoTotal</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordionOrders">
+                        <div class="accordion-body bg-light-subtle">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="text-muted mb-3"><i class="fa-solid fa-list me-2"></i>Artículos</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle bg-white rounded shadow-sm">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Producto</th>
+                                                    <th>Precio Unitario</th>
+                                                    <th class="text-center">Cant.</th>
+                                                    <th class="text-end">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in venta.Detalles)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <img src="@item.ImagenProducto" class="rounded me-2" width="40" height="40" style="object-fit: cover;" />
+                                                            <span class="small">@item.NombreProducto</span>
+                                                        </td>
+                                                        <td class="text-center fw-semibold">@item.PrecioUnitario</td>
+                                                        <td class="text-center">@item.Cantidad</td>
+                                                        <td class="text-end fw-semibold">@item.Total.ToString("C2")</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card border-0 bg-white shadow-sm p-3">
+                                        <h6 class="text-muted border-bottom pb-2"><i class="fa-solid fa-truck me-2"></i>Datos de Entrega</h6>
+                                        @if (venta.Direccion.NombreDistrito != "N/A" && !string.IsNullOrEmpty(venta.Direccion.NombreDistrito))
+                                        {
+                                            <p class="mb-1 fw-bold">@venta.Direccion.Contacto</p>
+                                            <p class="mb-1 small text-muted"><i class="fa-solid fa-phone fa-xs"></i> @venta.Direccion.Telefono</p>
+                                            <p class="mb-0 small">@venta.Direccion.DireccionCompleta</p>
+                                            <p class="small text-primary fw-medium mt-1">
+                                                @venta.Direccion.NombreDepartamento, @venta.Direccion.NombreProvincia, @venta.Direccion.NombreDistrito
+                                            </p>                                            
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small italic">Información de ubicación no registrada</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
