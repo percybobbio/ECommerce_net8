@@ -23,7 +23,7 @@ namespace MiTienda.Controllers
             {
                 return View(viewModel);
             }
-            
+
             var found = await _clienteService.Login(viewModel);
 
             // EL SEMÁFORO INTELIGENTE:
@@ -79,12 +79,12 @@ namespace MiTienda.Controllers
                 ViewBag.mensaje = "Registro exitoso, ya puedes iniciar sesión";
                 ViewBag.Class = "alert-success";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ViewBag.mensaje = "Error al registrar cliente: " + ex.Message;
                 ViewBag.Class = "alert-danger";
             }
-            
+
             return View();
 
         }
@@ -93,6 +93,11 @@ namespace MiTienda.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
+        }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

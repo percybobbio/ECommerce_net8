@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Acceso Denegado";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MiTienda</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MiTienda.styles.css" asp-append-version="true" />
+    <link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <i class="fa-solid fa-triangle-exclamation fa-5x text-warning mb-4"></i>
+                <h1 class="display-5 fw-bold text-dark">Acceso Restringido</h1>
+                <p class="lead text-muted mt-3">
+                    Lo sentimos, <b>@User.Identity?.Name</b>. No tienes los permisos necesarios para ver esta página o realizar esta acción.
+                </p>
+                <hr class="my-4" />
+                <p>Si crees que esto es un error, contacta al administrador del sistema.</p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3 px-4">
+                    <i class="fa-solid fa-house me-2"></i> Volver al Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

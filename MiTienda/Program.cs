@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Cuenta/Login"; // Ruta a la página de inicio de sesión
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Duración de la cookie de autenticación
         options.LogoutPath = "/Cuenta/Logout"; // Ruta a la página de cierre de sesión
-        options.AccessDeniedPath = "/Home/Error"; // Ruta a la página de acceso denegado
+        options.AccessDeniedPath = "/Cuenta/AccessDenied"; // Ruta a la página de acceso denegado
     });
 
 var app = builder.Build();
