@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MiTienda.Models;
 using MiTienda.Services;
 
 namespace MiTienda.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class MarcaController(MarcaService _marcaService) : Controller
     {
         public async Task<IActionResult> IndexAsync()

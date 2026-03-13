@@ -1,0 +1,46 @@
+﻿@model PerfilVM;
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white text-center">
+                    <h4 class="mb-0">Mi Perfil</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (TempData["MensajeExito"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["MensajeExito"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form action="/Cuenta/Profile" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Correo Electrónico</label>
+                            <input type="email" class="form-control text-muted" asp-for="Correo" readonly style="background-color: #f8f9fa;" />
+                            <small class="text-secondary">El correo electrónico es tu credencial de acceso y no puede ser modificado.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombres</label>
+                            <input type="text" class="form-control" asp-for="Nombres" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Apellidos</label>
+                            <input type="text" class="form-control" asp-for="Apellidos" required />
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                            <a href="/" class="btn btn-outline-secondary">Volver a la Tienda</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

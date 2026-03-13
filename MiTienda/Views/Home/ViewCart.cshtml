@@ -79,7 +79,7 @@ else
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/Home/PayNow" method="post">
+            <form action="/Home/PayNow" method="post" onsubmit="return mostrarPantallaCarga();">
                 
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Metodo de Pago</h1>
@@ -89,7 +89,12 @@ else
                     <div class="row g-3">
                         <h4 class="modal-subtitle">Cliente</h4>
                         <div class="col-12">
-                            <input type="email" class="form-control" placeholder="Correo Electrónico" />
+                            <input 
+                                type="email" 
+                                class="form-control" 
+                                placeholder="Correo Electrónico" 
+                                value="@User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value"
+                            />
                         </div>
                         <hr/>
                         <h4 class="fs-5">Dirección de Entrega</h4>
@@ -144,12 +149,20 @@ else
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Pagar Ahora</button>
+                    <button id="btnPagar" type="submit" class="btn btn-primary">Pagar Ahora</button>
                 </div>
 
             </form>
          </div>
     </div>
+</div>
+
+<div id="pantallaCarga" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+        <span class="visually-hidden">Procesando...</span>
+    </div>
+    <h3 class="mt-3 text-primary">Procesando tu pago...</h3>
+    <p class="text-muted">Generando recibo y enviando correo. Por favor, no cierres esta ventana.</p>
 </div>
 
 @section Scripts {
@@ -281,5 +294,16 @@ else
                         }
                     });
         }
+
+        function mostrarPantallaCarga() {
+            document.getElementById("pantallaCarga").style.display = "flex";
+
+            //2. Bloquear el boton de pagar para que no den doble click
+            document.getElementById("btnPagar").disabled = true;
+            document.getElementById("btnPagar").innerText = "Procesando...";
+             //3. retorna true para que el formulario si se envie y no se quede bloqueado en la pantalla de carga
+             return true;
+        }
+         // Agregar un evento al formulario para mostrar la pantalla de carga al enviar
     </script>
 }

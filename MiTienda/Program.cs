@@ -27,6 +27,8 @@ builder.Services.AddScoped<CarritoService>();
 builder.Services.AddScoped<OrdenService>();
 builder.Services.AddScoped<DireccionService>();
 builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<CorreoService>();
 
 //Activar memoria temporal para almacenar el carrito de compras
 builder.Services.AddSession(options =>

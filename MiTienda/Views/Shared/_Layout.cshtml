@@ -54,7 +54,7 @@
                                     Hola, @User.Claims.Where(c => c.Type == ClaimTypes.Name).Select(c => c.Value).FirstOrDefault()
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-id-card"></i> Perfil</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Cuenta" asp-action="Profile"><i class="fa-solid fa-id-card"></i> Perfil</a></li>
                                     <li><a class="dropdown-item" asp-controller="Usuario" asp-action="MyOrders"><i class="fa-solid fa-box"></i> Mis Ordenes</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" asp-controller="Cuenta" asp-action="Logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a></li>

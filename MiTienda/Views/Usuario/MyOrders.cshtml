@@ -24,8 +24,8 @@
                 var headerId = "heading" + i;
 
                 <div class="accordion-item">
-                    <h2 class="accordion-header" id="@headerId">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                    <h2 class="accordion-header d-flex align-items-center bg-white border-bottom" id="@headerId">
+                        <button class="accordion-button collapsed flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId">
                             <div class="d-flex justify-content-between w-100 me-3 align-items-center">
                                 <div>
                                     <span class="badge bg-primary me-2">Pedido #@(Model.Count - i)</span>
@@ -34,6 +34,9 @@
                                 <span class="fw-bold text-success">@venta.MontoTotal</span>
                             </div>
                         </button>
+                        <a asp-controller="Usuario" asp-action="DescargarReciboPDFHtmlToPDF" asp-route-id="@venta.IdVenta" class="btn btn-outline-dark m-3">
+                            <i class="fa-solid fa-file-pdf me-1"></i> Recibo en PDF
+                        </a>
                     </h2>
                     <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordionOrders">
                         <div class="accordion-body bg-light-subtle">

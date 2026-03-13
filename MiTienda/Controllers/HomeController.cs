@@ -17,6 +17,7 @@ namespace MiTienda.Controllers
         private readonly CarritoService _carritoService;
         private readonly OrdenService _ordenService;
         private readonly DireccionService _direccionService;
+        private readonly CorreoService _correoService;
 
         public HomeController(
             ILogger<HomeController> logger,
@@ -25,7 +26,8 @@ namespace MiTienda.Controllers
             ProductoService productoService,
             CarritoService carritoService,
             OrdenService ordenService,
-            DireccionService direccionService)
+            DireccionService direccionService,
+            CorreoService correoService)
         {
             _logger = logger;
             _categoriaService = categoriaService;
@@ -34,6 +36,7 @@ namespace MiTienda.Controllers
             _carritoService = carritoService;
             _ordenService = ordenService;
             _direccionService = direccionService;
+            _correoService = correoService;
         }
 
         //El metodo Index se encargara de cargar el catalogo completo, con todas las categorias, marcas y productos disponibles.
@@ -195,12 +198,36 @@ namespace MiTienda.Controllers
 
                 //El TODO sirve para ver en TaskList en la consola se accede por el menu view
                 int idCliente = 0;
+                string correoCliente = "";
                 var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                var emailClaim = HttpContext.User.FindFirst(ClaimTypes.Email);
+
                 if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var parsedId))
                 {
                     idCliente = parsedId;
                 }
-                await _ordenService.AddAsync(carrito, idCliente, direccionEnvio);
+
+                if(emailClaim != null)
+                {
+                    correoCliente = emailClaim.Value;
+                }
+
+                //1. Guardamos la orden para recibir el ID de la orden generada
+                int idNuevaVenta = await _ordenService.AddAsync(carrito, idCliente, direccionEnvio);
+
+                //2. Magia del Correo: Generar PDF y enviar
+                if(idNuevaVenta > 0 && !string.IsNullOrEmpty(correoCliente))
+                {
+                    //Creamos el PDF en memoria
+                    byte[] pdfBytes = await _ordenService.GenerarReciboPdfAsync(idNuevaVenta, idCliente);
+
+                    //Enviamos el correo con el PDF adjunto
+                    if(pdfBytes != null)
+                    {
+                        await _correoService.EnviarReciboPorCorreoAsync(correoCliente, pdfBytes, idNuevaVenta, carrito);
+                    }
+                }
+
                 _carritoService.VaciarCarrito();
 
                 return View("SalesCompleted");
